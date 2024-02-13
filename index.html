@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>three js editor</title>
+    <link rel="stylesheet" href="style.css">
+  </head>
+  <body>
+    <div class="main-container">
+      <div id="scene-container"></div>
+      <div id="cube-info">
+        <button id="new-scene-button">New Scene</button>
+        <button id="add-cube-button">Add Cube</button>
+        <button id="add-image-button">Add Image</button>
+        <div class="sub-div">
+          <p>Position: <div id="position" class="property"></div></p>
+          <p>Rotation: <div id="rotation" class="property"></div></p>
+          <p>scale: <div id="scale" class="property"></div></p>
+        </div>
+
+      </div>
+    </div>
+    
+    <div id="ui-container"></div>
+    <script type="module" src="/main.js"></script>
+  </body>
+</html>

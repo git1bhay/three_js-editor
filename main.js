@@ -4,44 +4,50 @@ import { GLTFExporter } from "three/examples/jsm/exporters/GLTFExporter";
 
 import { TransformControls } from "three/examples/jsm/controls/TransformControls";
 
+// import {CSS3DRenderer,CSS3DObject} from 'three/examples/jsm/renderers/CSS3DRenderer';
+
+
 const container = document.querySelector("#scene-container");
 const positionElement = document.getElementById("position");
 const rotationElement = document.getElementById("rotation");
 const scaleElement = document.getElementById("scale");
 
-function createTransformableObject(
-  sceneData,
-  orbitControls,
-  geometry,
-  material
-) {
-  const object = new THREE.Mesh(geometry, material);
-
-  // if(object.name==='plane'){
-  console.log(object);
-  sceneData.scene.add(object);
-  // }
-  const transformControls = new TransformControls(sceneData.camera, container);
-  sceneData.scene.add(transformControls);
-
-  transformControls.addEventListener("dragging-changed", (e) => {
-    console.log(orbitControls.enabled);
-
-    orbitControls.enabled = !e.value;
-    const objectPosition = transformControls.object;
-    console.log(objectPosition.position);
-    positionElement.innerText = `${objectPosition.position.x.toFixed(2)},
+let transformControls, object, box, cube, imgplane;
+let objectsToIntersect = [];
+function displayValues(transformControls) {
+  const objectPosition = transformControls;
+  // console.log(objectPosition.position);
+  positionElement.innerText = `${objectPosition.position.x.toFixed(2)},
      ${objectPosition.position.y.toFixed(2)},
       ${objectPosition.position.z.toFixed(2)}`;
 
-    rotationElement.innerText = `${objectPosition.rotation.x.toFixed(2)},
+  rotationElement.innerText = `${objectPosition.rotation.x.toFixed(2)},
       ${objectPosition.rotation.y.toFixed(2)},
        ${objectPosition.rotation.z.toFixed(2)}`;
 
-    scaleElement.innerText = `${objectPosition.scale.x.toFixed(2)},
+  scaleElement.innerText = `${objectPosition.scale.x.toFixed(2)},
        ${objectPosition.scale.y.toFixed(2)},
         ${objectPosition.scale.z.toFixed(2)}`;
-        
+}
+function createTransformaControls(sceneData, orbitControls, object) {
+  // if(object.name==='plane'){
+  console.log(object);
+
+  // objectsToIntersect.push(object);
+  console.log(objectsToIntersect);
+  // }
+  transformControls = new TransformControls(sceneData.camera, container);
+  sceneData.scene.add(transformControls);
+  console.log(transformControls);
+
+  transformControls.addEventListener("dragging-changed", (e) => {
+    // console.log(orbitControls.enabled);
+
+    orbitControls.enabled = !e.value;
+  });
+  transformControls.addEventListener("change", () => {
+    // console.log(transformControls);
+    displayValues(transformControls.object);
   });
 
   transformControls.attach(object);
@@ -55,21 +61,36 @@ function createTransformableObject(
       transformControls.setMode("scale");
     }
   });
+  // displayValues(transformControls.object);
 
   return transformControls;
 }
 function createcube(sceneData, orbitControls) {
   const geometry = new THREE.BoxGeometry(2, 2, 2);
   const material = new THREE.MeshBasicMaterial({ color: "red" });
-  // const cube = new THREE.Mesh(geometry, material);
-  // sceneData.scene.add(cube);
+  cube = new THREE.Mesh(geometry, material);
 
-  const transformCon = createTransformableObject(
+  box = new THREE.Box3();
+  box.setFromObject(cube);
+  console.log("hello", box);
+  const boxhelper = new THREE.Box3Helper(box);
+
+  // transformCon
+  // box.copy(cube.geometry.boundingBox).applyMatrix4(cube.matrixWorld);
+
+  sceneData.scene.add(cube, boxhelper);
+
+  objectsToIntersect.push(cube);
+  const transformCon1 = createTransformaControls(
     sceneData,
     orbitControls,
-    geometry,
-    material
+    cube
   );
+
+  transformCon1.addEventListener("change", () => {
+    box.copy(cube.geometry.boundingBox).applyMatrix4(cube.matrixWorld);
+    // console.log(transformControls);
+  });
 }
 function createimg(sceneData, orbitControls) {
   const textureLoader = new THREE.TextureLoader();
@@ -79,14 +100,25 @@ function createimg(sceneData, orbitControls) {
     map: texture,
     side: THREE.DoubleSide,
   });
-  const transformCon = createTransformableObject(
+  imgplane = new THREE.Mesh(geometry, material);
+  box = new THREE.Box3();
+  box.setFromObject(imgplane);
+
+  const boxhelper = new THREE.Box3Helper(box);
+  sceneData.scene.add(imgplane, boxhelper);
+  const transformCon = createTransformaControls(
     sceneData,
     orbitControls,
-    geometry,
-    material
+    imgplane
   );
-}
+  objectsToIntersect.push(imgplane);
 
+  transformCon.addEventListener("change", () => {
+    box.copy(imgplane.geometry.boundingBox).applyMatrix4(imgplane.matrixWorld);
+    // console.log(transformControls);
+  });
+}
+let selected = null;
 function createNewScene() {
   const scene = new THREE.Scene();
   scene.background = new THREE.Color("skyblue");
@@ -100,6 +132,33 @@ function createNewScene() {
   scene.add(gridhelper);
 
   const controls = new OrbitControls(camera, container);
+  const raycaster = new THREE.Raycaster();
+  const mouse = new THREE.Vector2();
+
+  container.addEventListener("click", (event) => {
+    const rect = renderer.domElement.getBoundingClientRect();
+    mouse.x =
+      ((event.clientX - rect.left) / renderer.domElement.clientWidth) * 2 - 1;
+    mouse.y =
+      -((event.clientY - rect.top) / renderer.domElement.clientHeight) * 2 + 1;
+
+    raycaster.setFromCamera(mouse, camera);
+
+    // Get the list of objects the ray intersects
+    const intersects = raycaster.intersectObjects(objectsToIntersect);
+    console.log("hi1", objectsToIntersect);
+    console.log("hi", intersects);
+    
+    if (intersects.length > 0) {
+      selected = true;
+      console.log(selected, intersects);
+      transformControls.visible = true;
+    } else {
+      selected = false;
+      console.log(selected, intersects);
+      transformControls.visible = false;
+    }
+  });
   return { scene, camera, controls };
 }
 
@@ -117,6 +176,12 @@ renderer.render(initialScene, initialCamera);
 
 // const controls = new OrbitControls(currentSceneData.camera, renderer.domElement);
 
+
+// function textContent(){
+//   const cssRenderer = new CSS3DRenderer();
+
+// }
+// textContent();
 function animate() {
   requestAnimationFrame(animate);
   initialControls.update();
@@ -124,24 +189,24 @@ function animate() {
 }
 animate();
 
-function intialvalue(){
+function intialvalue() {
   positionElement.innerText = `${0.0},
      ${0.0},
       ${0.0}`;
-rotationElement.innerText = `${0.0},
+  rotationElement.innerText = `${0.0},
       ${0.0},
        ${0.0}`;
-scaleElement.innerText = `${0.0},
+  scaleElement.innerText = `${0.0},
        ${0.0},
         ${0.0}`;
 }
-intialvalue()
+intialvalue();
 
 
 
 document.querySelector("#new-scene-button").addEventListener("click", () => {
   currentSceneData = createNewScene();
-  intialvalue()
+  intialvalue();
   animate();
   initialControls.update();
 });
@@ -162,6 +227,15 @@ document.querySelector("#add-image-button").addEventListener("click", () => {
     renderer.render(currentSceneData.scene, currentSceneData.camera);
     initialControls.update();
   }
+});
+
+window.addEventListener("resize", () => {
+  const width = container.clientWidth;
+  const height = container.clientHeight;
+
+  renderer.setSize(width, height);
+  currentSceneData.camera.aspect = width / height;
+  currentSceneData.camera.updateProjectionMatrix();
 });
 
 // const link = document.createElement("a");

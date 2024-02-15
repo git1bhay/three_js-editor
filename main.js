@@ -12,7 +12,7 @@ const positionElement = document.getElementById("position");
 const rotationElement = document.getElementById("rotation");
 const scaleElement = document.getElementById("scale");
 
-let transformControls, object, box, cube, imgplane;
+let transformControls, object, box, cube, imgplane,text,texture;
 let objectsToIntersect = [];
 function displayValues(transformControls) {
   const objectPosition = transformControls;
@@ -70,15 +70,15 @@ function createcube(sceneData, orbitControls) {
   const material = new THREE.MeshBasicMaterial({ color: "red" });
   cube = new THREE.Mesh(geometry, material);
 
-  box = new THREE.Box3();
-  box.setFromObject(cube);
-  console.log("hello", box);
-  const boxhelper = new THREE.Box3Helper(box);
+  // box = new THREE.Box3();
+  // box.setFromObject(cube);
+  // console.log("hello", box);
+  // const boxhelper = new THREE.Box3Helper(box);
 
   // transformCon
   // box.copy(cube.geometry.boundingBox).applyMatrix4(cube.matrixWorld);
 
-  sceneData.scene.add(cube, boxhelper);
+  sceneData.scene.add(cube);
 
   objectsToIntersect.push(cube);
   const transformCon1 = createTransformaControls(
@@ -87,25 +87,27 @@ function createcube(sceneData, orbitControls) {
     cube
   );
 
-  transformCon1.addEventListener("change", () => {
-    box.copy(cube.geometry.boundingBox).applyMatrix4(cube.matrixWorld);
-    // console.log(transformControls);
-  });
+  // transformCon1.addEventListener("change", () => {
+  //   box.copy(cube.geometry.boundingBox).applyMatrix4(cube.matrixWorld);
+  //   // console.log(transformControls);
+  // });
 }
 function createimg(sceneData, orbitControls) {
   const textureLoader = new THREE.TextureLoader();
   const texture = textureLoader.load("./graycloud_dn.jpg");
+  
   const geometry = new THREE.PlaneGeometry(2, 2);
+
   const material = new THREE.MeshBasicMaterial({
     map: texture,
     side: THREE.DoubleSide,
   });
   imgplane = new THREE.Mesh(geometry, material);
-  box = new THREE.Box3();
-  box.setFromObject(imgplane);
+  // box = new THREE.Box3();
+  // box.setFromObject(imgplane);
 
-  const boxhelper = new THREE.Box3Helper(box);
-  sceneData.scene.add(imgplane, boxhelper);
+  // const boxhelper = new THREE.Box3Helper(box);
+  sceneData.scene.add(imgplane);
   const transformCon = createTransformaControls(
     sceneData,
     orbitControls,
@@ -113,11 +115,83 @@ function createimg(sceneData, orbitControls) {
   );
   objectsToIntersect.push(imgplane);
 
-  transformCon.addEventListener("change", () => {
-    box.copy(imgplane.geometry.boundingBox).applyMatrix4(imgplane.matrixWorld);
-    // console.log(transformControls);
-  });
+  // transformCon.addEventListener("change", () => {
+  //   box.copy(imgplane.geometry.boundingBox).applyMatrix4(imgplane.matrixWorld);
+  //   // console.log(transformControls);
+  // });
 }
+
+function addtext(sceneData, orbitControls) {
+  const canvas = document.createElement('canvas');
+  const context = canvas.getContext('2d');
+  // context.beginPath();
+  // context.arc(32, 32, 16, 0, 2 * Math.PI);
+  // context.closePath();
+  // context.fillStyle = color.getStyle();
+  // context.fill();
+  context.font = 'bold 32px Arial';
+  context.fillStyle = 'red';
+  
+
+  const input = document.getElementById('myInput');
+  
+  
+  input.addEventListener('input', () => {
+    context.clearRect(0, 0, canvas.width, canvas.height);
+    context.fillText(input.value, 0, 32);
+    texture.needsUpdate = true;
+  });
+
+  // Initialize the texture
+  texture = new THREE.CanvasTexture(canvas);
+  texture.magFilter = THREE.NearestFilter;
+  text = new THREE.Mesh(
+    new THREE.PlaneGeometry(1, 1),
+    new THREE.MeshBasicMaterial({
+      map: texture,
+      side: THREE.DoubleSide,
+      // color: "black"
+    })
+  );
+
+  // box = new THREE.Box3();
+  // box.setFromObject(text);
+
+  // const boxhelper = new THREE.Box3Helper(box);
+  sceneData.scene.add(text);
+
+  const transformCon = createTransformaControls(
+    sceneData,
+    orbitControls,
+    text
+  );
+  objectsToIntersect.push(text);
+
+  // transformCon.addEventListener("change", () => {
+  //   box.copy(text.geometry.boundingBox).applyMatrix4(text.matrixWorld);
+  // });
+}
+
+function createVideo(sceneData, orbitControls) {
+  const video = document.createElement('video');
+  video.src = "Cannon.js Tutorial For Beginners - Add Gravity, Collision, And Other Physics Laws To Your 3D Web App.mp4"; // Replace with the path to your video file
+  video.loop = true;
+  video.crossOrigin = "anonymous";
+  video.play(); 
+
+  const videoTexture = new THREE.VideoTexture(video);
+  const geometry = new THREE.PlaneGeometry(2, 2);
+  const material = new THREE.MeshBasicMaterial({ map: videoTexture, side: THREE.DoubleSide,
+    transparent:true,
+    opacity: 0.9
+   });
+  const videoplane = new THREE.Mesh(geometry, material);
+
+  sceneData.scene.add(videoplane);
+  const transformCon = createTransformaControls(sceneData, orbitControls, videoplane);
+  objectsToIntersect.push(videoplane);
+}
+
 let selected = null;
 function createNewScene() {
   const scene = new THREE.Scene();
@@ -224,6 +298,22 @@ document.querySelector("#add-image-button").addEventListener("click", () => {
   if (currentSceneData) {
     createimg(currentSceneData, currentSceneData.controls);
 
+    renderer.render(currentSceneData.scene, currentSceneData.camera);
+    initialControls.update();
+  }
+});
+
+document.querySelector("#add-text-button").addEventListener("click", () => {
+  if (currentSceneData) {
+    addtext(currentSceneData, currentSceneData.controls);
+
+    renderer.render(currentSceneData.scene, currentSceneData.camera);
+    initialControls.update();
+  }
+});
+document.querySelector("#add-video-button").addEventListener("click", () => {
+  if (currentSceneData) {
+    createVideo(currentSceneData, currentSceneData.controls);
     renderer.render(currentSceneData.scene, currentSceneData.camera);
     initialControls.update();
   }

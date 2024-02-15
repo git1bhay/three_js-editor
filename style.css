@@ -46,4 +46,14 @@ button{
   color: white;
   cursor: pointer;
 }
+/* #myCanvas{
+  position: absolute;
+} */
+
+#myInput{
+  margin-left: 20%;
+  padding: 10px;
+  border-style: none;
+  overflow-y: auto;
+}
 

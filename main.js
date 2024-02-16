@@ -4,8 +4,9 @@ import { GLTFExporter } from "three/examples/jsm/exporters/GLTFExporter";
 
 import { TransformControls } from "three/examples/jsm/controls/TransformControls";
 
-// import {CSS3DRenderer,CSS3DObject} from 'three/examples/jsm/renderers/CSS3DRenderer';
 
+
+import { Text } from "troika-three-text";
 
 const container = document.querySelector("#scene-container");
 const positionElement = document.getElementById("position");
@@ -70,14 +71,7 @@ function createcube(sceneData, orbitControls) {
   const material = new THREE.MeshBasicMaterial({ color: "red" });
   cube = new THREE.Mesh(geometry, material);
 
-  // box = new THREE.Box3();
-  // box.setFromObject(cube);
-  // console.log("hello", box);
-  // const boxhelper = new THREE.Box3Helper(box);
-
-  // transformCon
-  // box.copy(cube.geometry.boundingBox).applyMatrix4(cube.matrixWorld);
-
+  
   sceneData.scene.add(cube);
 
   objectsToIntersect.push(cube);
@@ -87,10 +81,7 @@ function createcube(sceneData, orbitControls) {
     cube
   );
 
-  // transformCon1.addEventListener("change", () => {
-  //   box.copy(cube.geometry.boundingBox).applyMatrix4(cube.matrixWorld);
-  //   // console.log(transformControls);
-  // });
+  
 }
 function createimg(sceneData, orbitControls) {
   const textureLoader = new THREE.TextureLoader();
@@ -103,10 +94,8 @@ function createimg(sceneData, orbitControls) {
     side: THREE.DoubleSide,
   });
   imgplane = new THREE.Mesh(geometry, material);
-  // box = new THREE.Box3();
-  // box.setFromObject(imgplane);
+  
 
-  // const boxhelper = new THREE.Box3Helper(box);
   sceneData.scene.add(imgplane);
   const transformCon = createTransformaControls(
     sceneData,
@@ -115,62 +104,62 @@ function createimg(sceneData, orbitControls) {
   );
   objectsToIntersect.push(imgplane);
 
-  // transformCon.addEventListener("change", () => {
-  //   box.copy(imgplane.geometry.boundingBox).applyMatrix4(imgplane.matrixWorld);
-  //   // console.log(transformControls);
-  // });
-}
-
-function addtext(sceneData, orbitControls) {
-  const canvas = document.createElement('canvas');
-  const context = canvas.getContext('2d');
-  // context.beginPath();
-  // context.arc(32, 32, 16, 0, 2 * Math.PI);
-  // context.closePath();
-  // context.fillStyle = color.getStyle();
-  // context.fill();
-  context.font = 'bold 32px Arial';
-  context.fillStyle = 'red';
   
+}
+function addtext(sceneData, orbitControls) {
+
 
   const input = document.getElementById('myInput');
-  
-  
-  input.addEventListener('input', () => {
-    context.clearRect(0, 0, canvas.width, canvas.height);
-    context.fillText(input.value, 0, 32);
-    texture.needsUpdate = true;
-  });
 
-  // Initialize the texture
-  texture = new THREE.CanvasTexture(canvas);
-  texture.magFilter = THREE.NearestFilter;
+  
+  // Initial text setup
+
+  // Function to update the text on the canvas and adjust the plane size
+  
+
+  
+  let text1 = new Text()
+  // text1.font = 'path/to/font.woff'
+  function updateText() {
+    const textValue = input.value;
+
+    text1.text = textValue;
+
+    text1.fontSize = 0.2
+    text1.color = 0x9966FF
+
+    text1.sync()
+
+  }
+  // console.log(text);
+  
+  
+  // myScene.add(text)
   text = new THREE.Mesh(
-    new THREE.PlaneGeometry(1, 1),
-    new THREE.MeshBasicMaterial({
-      map: texture,
-      side: THREE.DoubleSide,
-      // color: "black"
-    })
-  );
-
-  // box = new THREE.Box3();
-  // box.setFromObject(text);
-
-  // const boxhelper = new THREE.Box3Helper(box);
-  sceneData.scene.add(text);
+        new THREE.PlaneGeometry(1, 1),
+        new THREE.MeshBasicMaterial({
+          map: texture,
+          side: THREE.DoubleSide,
+          color: "black"
+        })
+      );
+  // text.add(text1);
+  sceneData.scene.add(text1);
+  updateText();
 
   const transformCon = createTransformaControls(
     sceneData,
     orbitControls,
-    text
+    text1
   );
   objectsToIntersect.push(text);
+  
 
-  // transformCon.addEventListener("change", () => {
-  //   box.copy(text.geometry.boundingBox).applyMatrix4(text.matrixWorld);
-  // });
+  // Event listener for text input changes
+  input.addEventListener('input', updateText);
 }
+
+
 
 function createVideo(sceneData, orbitControls) {
   const video = document.createElement('video');

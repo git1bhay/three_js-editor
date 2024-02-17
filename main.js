@@ -5,7 +5,6 @@ import { GLTFExporter } from "three/examples/jsm/exporters/GLTFExporter";
 import { TransformControls } from "three/examples/jsm/controls/TransformControls";
 
 
-
 import { Text } from "troika-three-text";
 
 const container = document.querySelector("#scene-container");
@@ -51,7 +50,7 @@ function createTransformaControls(sceneData, orbitControls, object) {
     displayValues(transformControls.object);
   });
 
-  transformControls.attach(object);
+  // transformControls.attach(object);
 
   window.addEventListener("keydown", (event) => {
     if (event.key === "1") {
@@ -152,7 +151,7 @@ function addtext(sceneData, orbitControls) {
     orbitControls,
     text1
   );
-  objectsToIntersect.push(text);
+  objectsToIntersect.push(text1);
   
 
   // Event listener for text input changes
@@ -205,23 +204,31 @@ function createNewScene() {
     mouse.y =
       -((event.clientY - rect.top) / renderer.domElement.clientHeight) * 2 + 1;
 
-    raycaster.setFromCamera(mouse, camera);
+      raycaster.setFromCamera(mouse, initialCamera);
 
-    // Get the list of objects the ray intersects
-    const intersects = raycaster.intersectObjects(objectsToIntersect);
-    console.log("hi1", objectsToIntersect);
-    console.log("hi", intersects);
-    
-    if (intersects.length > 0) {
-      selected = true;
-      console.log(selected, intersects);
-      transformControls.visible = true;
-    } else {
-      selected = false;
-      console.log(selected, intersects);
-      transformControls.visible = false;
-    }
-  });
+      // Get the list of objects the ray intersects
+      const intersects = raycaster.intersectObjects(objectsToIntersect);
+      console.log("hi1", objectsToIntersect);
+      // console.log("hi", intersects[0].object);
+      console.log(transformControls);
+      if (intersects.length > 0) {
+        selected = true;
+        console.log(selected, intersects);
+        transformControls.visible = true;
+        console.log('hiiii',intersects[0].object);
+        transformControls.attach(intersects[0].object);
+        console.log('hyyg',intersects[0].object);
+
+  
+      } else {
+        selected = false;
+        console.log(selected, intersects);
+        transformControls.visible = false;
+        transformControls.detach(intersects[0].object);
+  
+      }
+      console.log('tg',transformControls);
+    });
   return { scene, camera, controls };
 }
 

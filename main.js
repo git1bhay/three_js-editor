@@ -8,6 +8,7 @@ import { TransformControls } from "three/examples/jsm/controls/TransformControls
 
 import BaseScene from "./Js/BaseClass";
 // import { CSS3DObject } from "three/examples/jsm/renderers/CSS3DRenderer";
+import AddText from "./Js/textClass";
 
 import { Text } from "troika-three-text";
 
@@ -17,11 +18,12 @@ let camera = base.camera;
 let controlsOrbit = base.controls;
 let container = base.container;
 let renderer = base.renderer;
-let controls1 = base.controls1;
+// let controls1 = base.controls1;
 
 const positionElement = document.getElementById("position");
 const rotationElement = document.getElementById("rotation");
 const scaleElement = document.getElementById("scale");
+
 
 let transformControls, object, box, cube, imgplane, text, texture;
 let objectsToIntersect = [];
@@ -57,7 +59,7 @@ function createTransformaControls() {
     // console.log(orbitControls.enabled);
 
     controlsOrbit.enabled = !e.value;
-    controls1.enabled = !e.value;
+    // controls1.enabled = !e.value;
   });
   transformControls.addEventListener("change", () => {
     // console.log(transformControls);
@@ -111,7 +113,6 @@ function createimg() {
   objectsToIntersect.push(imgplane);
 }
 function addtext() {
-  const input = document.getElementById("myInput");
 
   // Initial text setup
 
@@ -262,9 +263,16 @@ function intialvalue() {
 intialvalue();
 createNewScene();
 
+
+
+
+const textmesh = new AddText(scene,objectsToIntersect);
+// const Mesh = textmesh.textMesh;
+// objectsToIntersect.push(Mesh);
 document.querySelector("#new-scene-button").addEventListener("click", () => {
-  // textcss();
+  textmesh.updateCanvas();
 });
+
 
 document.querySelector("#add-cube-button").addEventListener("click", () => {
   createcube();
